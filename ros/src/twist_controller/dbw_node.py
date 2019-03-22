@@ -93,7 +93,7 @@ class DBWNode(object):
                         self.angular_vel, self.current_vel)
                 self.throttle, self.brake, self.steer = self.controller.control(
                     self.linear_vel, self.angular_vel, self.current_vel,
-                    self.dbw_enabled
+                    self.current_ang_vel, self.dbw_enabled
                     )
                 rospy.loginfo('throttle is: %f, brake is: %f, steering is: %f', 
                         self.throttle, self.brake, self.steer)
@@ -105,6 +105,7 @@ class DBWNode(object):
 
     def current_velocity_cb(self, msg):
         self.current_vel = msg.twist.linear.x
+        self.current_ang_vel = msg.twist.angular.z
 
     def dbw_enabled_cb(self, msg):
         self.dbw_enabled = msg.data

@@ -58,7 +58,7 @@ class WaypointUpdater(object):
     def get_closest_waypoint_idx(self):
         x = self.pose.position.x
         y = self.pose.position.y
-        rospy.logwarn('Current position is: (%f, %f)', x, y)
+        #rospy.logwarn('Current position is: (%f, %f)', x, y)
 
         closest_idx = self.waypoint_tree.query([x, y], 1)[1]
         closest_point = self.base_waypoints_2d[closest_idx]
@@ -79,12 +79,12 @@ class WaypointUpdater(object):
         lane.header = self.base_waypoints.header
         lane.waypoints = self.base_waypoints.waypoints[closest_idx:closest_idx +
                 LOOKAHEAD_WPS]
-        rospy.logwarn('The closest idx is %d', closest_idx)
-        rospy.logwarn('The first two way points are (%f, %f), (%f, %f)',
-                lane.waypoints[0].pose.pose.position.x,
-                lane.waypoints[0].pose.pose.position.y, 
-                lane.waypoints[1].pose.pose.position.x, 
-                lane.waypoints[1].pose.pose.position.y)
+        #rospy.logwarn('The closest idx is %d', closest_idx)
+        #rospy.logwarn('The first two way points are (%f, %f), (%f, %f)',
+                #lane.waypoints[0].pose.pose.position.x,
+                #lane.waypoints[0].pose.pose.position.y, 
+                #lane.waypoints[1].pose.pose.position.x, 
+                #lane.waypoints[1].pose.pose.position.y)
         self.final_waypoints_pub.publish(lane)
 
     def pose_cb(self, msg):
