@@ -17,7 +17,7 @@ class Controller(object):
         ki = 0.1
         kd = 0.
         mn = 0.
-        mx = 0.2
+        mx = 0.5
         self.throttle_controller = PID(kp, ki, kd, mn, mx)
 
         tau = 0.5
@@ -38,15 +38,16 @@ class Controller(object):
         # Return throttle, brake, steer
         if not dbw_enabled:
             self.throttle_controller.reset()
+            self.last_time = rospy.get_time()
             return 0., 0., 0
 
         current_vel = self.vel_lpf.filt(current_vel)
-        rospy.loginfo('linear_vel=%f', linear_vel)
-        rospy.loginfo('angular_vel=%f', angular_vel)
-        rospy.loginfo('current_vel=%f', current_vel)
+        #rospy.loginfo('linear_vel=%f', linear_vel)
+        #rospy.loginfo('angular_vel=%f', angular_vel)
+        #rospy.loginfo('current_vel=%f', current_vel)
         steering = self.yaw_controller.get_steering(linear_vel,
                 angular_vel, current_vel)
-        rospy.loginfo('steering=%f', steering)
+        #rospy.loginfo('steering=%f', steering)
             
         time_now = rospy.get_time()
         time_elapsed = time_now - self.last_time
