@@ -246,8 +246,8 @@ bool PurePursuit::verifyFollowing() const
   else
   {
     // ROS_INFO("Following : False");
-    ROS_ERROR("Not following");
-    ROS_ERROR("side diff : %lf , angle diff : %lf",displacement,relative_angle);
+    //ROS_ERROR("Not following");
+    //ROS_ERROR("side diff : %lf , angle diff : %lf",displacement,relative_angle);
     return false;
   }
 }
