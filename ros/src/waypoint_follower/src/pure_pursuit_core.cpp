@@ -237,7 +237,7 @@ bool PurePursuit::verifyFollowing() const
   getLinearEquation(current_waypoints_.getWaypointPosition(1), current_waypoints_.getWaypointPosition(2), &a, &b, &c);
   double displacement = getDistanceBetweenLineAndPoint(current_pose_.pose.position, a, b, c);
   double relative_angle = getRelativeAngle(current_waypoints_.getWaypointPose(1), current_pose_.pose);
-  ROS_ERROR("side diff : %lf , angle diff : %lf",displacement,relative_angle);
+  //ROS_ERROR("side diff : %lf , angle diff : %lf",displacement,relative_angle);
   if (displacement < displacement_threshold_ && relative_angle < relative_angle_threshold_)
   {
     // ROS_INFO("Following : True");
@@ -246,6 +246,8 @@ bool PurePursuit::verifyFollowing() const
   else
   {
     // ROS_INFO("Following : False");
+    ROS_ERROR("Not following");
+    ROS_ERROR("side diff : %lf , angle diff : %lf",displacement,relative_angle);
     return false;
   }
 }
@@ -259,14 +261,15 @@ geometry_msgs::Twist PurePursuit::calcTwist(double curvature, double cmd_velocit
   twist.linear.x = cmd_velocity;
   if (!following_flag)
   {
-    ROS_ERROR_STREAM("Not following");
+    //ROS_ERROR_STREAM("Not following");
     twist.angular.z = current_velocity_.twist.linear.x * curvature;
   }
   else
   {
     twist.angular.z = prev_angular_velocity;
   }
-  twist.angular.z = current_velocity_.twist.linear.x * curvature;
+  //twist.angular.z = current_velocity_.twist.linear.x * curvature;
+  //twist.angular.z = twist.linear.x * curvature;
 
   prev_angular_velocity = twist.angular.z;
   return twist;
