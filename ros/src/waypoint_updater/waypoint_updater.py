@@ -25,7 +25,7 @@ TODO (for Yousuf and Aaron): Stopline location for each traffic light.
 '''
 
 LOOKAHEAD_WPS = 20 # Number of waypoints we will publish. You can change this number
-
+#LOOKAHEAD_REDLIGHT = 20
 
 class WaypointUpdater(object):
     def __init__(self):
@@ -103,7 +103,7 @@ class WaypointUpdater(object):
         if self.stopline_wp_idx == -1 or farthest_idx < self.stopline_wp_idx:
             lane.waypoints = final_waypoints
         else:
-            rospy.logwarn('Start decelerating=====================')
+            #rospy.logwarn('Start decelerating=====================')
             lane.waypoints = self.decelerate_waypoints(final_waypoints,
                     closest_idx) 
         return lane
@@ -111,7 +111,7 @@ class WaypointUpdater(object):
     def decelerate_waypoints(self, waypoints, closest_idx):
         final_waypoints = []
 
-        stop_idx = max(self.stopline_wp_idx-closest_idx-2, 0)
+        stop_idx = max(self.stopline_wp_idx-closest_idx-5, 0)
         for idx,  wp in enumerate(waypoints):
             p = Waypoint()
             p.pose = wp.pose
@@ -121,8 +121,10 @@ class WaypointUpdater(object):
             if vel < 1.:
                 vel = 0
             p.twist.twist.linear.x = min(vel, wp.twist.twist.linear.x)
-            rospy.loginfo('Set linear velocity to %f', p.twist.twist.linear.x)
+            #rospy.loginfo('Set linear velocity to %f', p.twist.twist.linear.x)
             final_waypoints.append(p)
+            if idx > stop_idx:
+                break
 
         return final_waypoints
 
