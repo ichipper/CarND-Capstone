@@ -54,7 +54,7 @@ class WaypointUpdater(object):
         #rospy.spin()
 
     def loop(self):
-        rate = rospy.Rate(50)
+        rate = rospy.Rate(10)
         while not rospy.is_shutdown():
             if self.pose and self.base_waypoints_2d:
                 closest_idx = self.get_closest_waypoint_idx()
@@ -111,7 +111,7 @@ class WaypointUpdater(object):
     def decelerate_waypoints(self, waypoints, closest_idx):
         final_waypoints = []
 
-        stop_idx = max(self.stopline_wp_idx-closest_idx-5, 0)
+        stop_idx = max(self.stopline_wp_idx-closest_idx-8, 0)
         for idx,  wp in enumerate(waypoints):
             p = Waypoint()
             p.pose = wp.pose

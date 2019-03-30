@@ -26,6 +26,7 @@ class TLDetector(object):
         self.waypoints_tree = None
         self.camera_image = None
         self.lights = []
+        self.image_counter = 0
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -82,7 +83,12 @@ class TLDetector(object):
         """
         self.has_image = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
+        self.image_counter += 1
+        if self.image_counter == 4:
+            light_wp, state = self.process_traffic_lights()
+            self.image_counter = 0
+        else:
+            return
 
         '''
         Publish upcoming red lights at camera frequency.
