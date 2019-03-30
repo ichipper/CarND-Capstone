@@ -15,6 +15,8 @@ from scipy.spatial import KDTree
 import numpy as np
 
 STATE_COUNT_THRESHOLD = 3
+SAVE_IMAGE_INTERVAL = 2
+SAVE_IMAGE_START = 0
 
 class TLDetector(object):
     def __init__(self):
@@ -27,6 +29,7 @@ class TLDetector(object):
         self.camera_image = None
         self.lights = []
         self.image_counter = 0
+        self.save_image_counter = SAVE_IMAGE_START
 
         sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
         sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
@@ -85,27 +88,6 @@ class TLDetector(object):
         self.camera_image = msg
         self.image_counter += 1
 
-        if self.image_counter % 100 == 0
-            # Decode to cv2 image and store
-            cv2_img = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
-            #cv2_img = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
-            img_file_path = "/tmp/camera_img/img%d.png" %(self.image_counter/100)
-            cv2.imwrite(img_file_path, cv2_img)
-            rospy.loginfo("Saved to: " + img_file_path)
-            light_wp, state = self.process_traffic_lights()
-            if state == TrafficLight.RED:
-                label = 'red'
-            elif state == TrafficLight.YELLOW:
-                label = 'yellow'
-            elif state == TrafficLight.GREEN:
-                label = 'green'
-            else:
-                label = 'unknown'
-            with open('/tmp/camera_img_label', 'a') as fo:
-                fo.write(img_file_path+', '+label+'\n' )
-        
-        return
-
         ########################
         
         if self.image_counter == 4:
@@ -134,7 +116,29 @@ class TLDetector(object):
 
         #if light_wp >= 0:
             #rospy.logwarn('Red light!')
-
+    def save_camera_images(self, camera_msg, state):
+        self.save_image_counter += 1
+        if self.save_image_counter % SAVE_IMAGE_INTERVAL != 0:
+            return
+        # Decode to cv2 image and store
+        cv2_img = self.bridge.imgmsg_to_cv2(camera_msg, "bgr8")
+        #cv2_img = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
+        img_file_path = "/tmp/camera_img/img%d.png" %(self.save_image_counter/SAVE_IMAGE_INTERVAL)
+        cv2.imwrite(img_file_path, cv2_img)
+        rospy.loginfo("Saved to: " + img_file_path)
+        light_wp, state = self.process_traffic_lights()
+        if state == TrafficLight.RED:
+            label = 'red'
+        elif state == TrafficLight.YELLOW:
+            label = 'yellow'
+        elif state == TrafficLight.GREEN:
+            label = 'green'
+        else:
+            label = 'unknown'
+        with open('/tmp/camera_img_label', 'a') as fo:
+            fo.write(img_file_path+', '+label+'\n' )
+        
+        
     def get_closest_waypoint(self, pose):
         """Identifies the closest path waypoint to the given position
             https://en.wikipedia.org/wiki/Closest_pair_of_points_problem
@@ -174,6 +178,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+        self.save_camera_images(self.camera_image, light.state)
         return light.state
         #if(not self.has_image):
             #self.prev_light_loc = None
@@ -217,7 +222,7 @@ class TLDetector(object):
                     closest_light = light
                     diff = d
 
-        if light:
+        if closest_light and diff < 50:
             state = self.get_light_state(closest_light)
             return light_wp_idx, state
         #self.waypoints = None
