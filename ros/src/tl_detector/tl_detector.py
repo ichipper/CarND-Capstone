@@ -124,7 +124,7 @@ class TLDetector(object):
         if self.save_image_counter % SAVE_IMAGE_INTERVAL != 0:
             return
         # Decode to cv2 image and store
-        cv2_img = self.bridge.imgmsg_to_cv2(camera_msg, "bgr8")
+        cv2_img = self.bridge.imgmsg_to_cv2(camera_msg, "rgb8")
         #cv2_img = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
         img_file_path = "/tmp/camera_img/img%d.png" %(self.save_image_counter/SAVE_IMAGE_INTERVAL)
         cv2.imwrite(img_file_path, cv2_img)
