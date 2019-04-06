@@ -5,8 +5,8 @@ import tensorflow as tf
 import cv2
 COLOR_MAP = {1: (0, 255, 0), 2: (255, 0, 0), 3: (255, 255, 0), 4: (0, 0, 255)}
 COLOR_NAME = {1: 'Green', 2: 'Red', 3: 'Yellow', 4: 'Off'}
-COLOR_THRESHOLD = 180
-AREA_THRESHOLD = 30
+COLOR_THRESHOLD = 200
+AREA_THRESHOLD = 40
 RED_CHANNEL = 2
 GREEN_CHANNEL = 1
 #SSD_INCEPTION_MODEL_FILE = '../../Traffic-Light-Classification/models/ssd_sim/frozen_inference_graph.pb'
@@ -14,7 +14,7 @@ SSD_INCEPTION_MODEL_FILE = os.path.join(os.path.dirname(os.path.realpath(__file_
         #'../../../../models/ssd_sim/frozen_inference_graph.pb')
         '../../../../models/ssd_mobilenet_v1_sim_2019_04_06/frozen_inference_graph.pb')
         #'../../../../models/faster_rcnn_inception_v2_sim_2019_04_05/frozen_inference_graph.pb')
-DEBUG = True
+DEBUG = False
 
 class TLClassifier(object):
     def __init__(self):
@@ -128,8 +128,8 @@ class TLClassifier(object):
 
             boxes, scores, classes = self.filter_boxes(0.5, boxes, scores, classes)
             height, width = image.shape[0], image.shape[1]
-            box_coords = to_image_coords(boxes, height, width)
-            classes = classify_color(image, box_coords)
+            box_coords = self.to_image_coords(boxes, height, width)
+            classes = self.classify_color(image, box_coords)
             #To save image for debugging:
             if DEBUG:
                 print boxes
