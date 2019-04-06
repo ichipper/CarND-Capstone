@@ -5,9 +5,15 @@ import tensorflow as tf
 import cv2
 COLOR_MAP = {1: (0, 255, 0), 2: (255, 0, 0), 3: (255, 255, 0), 4: (0, 0, 255)}
 COLOR_NAME = {1: 'Green', 2: 'Red', 3: 'Yellow', 4: 'Off'}
+COLOR_THRESHOLD = 180
+AREA_THRESHOLD = 30
+RED_CHANNEL = 2
+GREEN_CHANNEL = 1
 #SSD_INCEPTION_MODEL_FILE = '../../Traffic-Light-Classification/models/ssd_sim/frozen_inference_graph.pb'
 SSD_INCEPTION_MODEL_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-        '../../../../models/ssd_sim/frozen_inference_graph.pb')
+        #'../../../../models/ssd_sim/frozen_inference_graph.pb')
+        '../../../../models/ssd_mobilenet_v1_sim_2019_04_06/frozen_inference_graph.pb')
+        #'../../../../models/faster_rcnn_inception_v2_sim_2019_04_05/frozen_inference_graph.pb')
 DEBUG = True
 
 class TLClassifier(object):
@@ -77,6 +83,25 @@ class TLClassifier(object):
             score_str = '%s=%f' %(COLOR_NAME[class_id], scores[i])
             cv2.putText(image, score_str, (left, bot), cv2.FONT_HERSHEY_SIMPLEX,  1, COLOR_MAP[class_id], 2)
 
+    def classify_color(self, image, boxes):
+        classes = []
+        for i in range(len(boxes)):
+            bot, left, top, right = boxes[i, ...]
+            img = image[int(bot):int(top), int(left):int(right),:]
+            reg_img = img[:, :, RED_CHANNEL]
+            green_img = img[:, :, GREEN_CHANNEL]
+            red = np.sum(reg_img>COLOR_THRESHOLD)
+            green = np.sum(green_img>COLOR_THRESHOLD)
+            if red > AREA_THRESHOLD and green > AREA_THRESHOLD:
+                label = 3
+            elif red > AREA_THRESHOLD:
+                label = 2
+            elif green > AREA_THRESHOLD:
+                label = 1
+            else:
+                label = 4
+            classes.append(label)
+        return classes
 
     def get_classification(self, image):
         """Determines the color of the traffic light in the image
@@ -101,7 +126,10 @@ class TLClassifier(object):
             scores = np.squeeze(scores)
             classes = np.squeeze(classes)
 
-            boxes, scores, classes = self.filter_boxes(0.1, boxes, scores, classes)
+            boxes, scores, classes = self.filter_boxes(0.5, boxes, scores, classes)
+            height, width = image.shape[0], image.shape[1]
+            box_coords = to_image_coords(boxes, height, width)
+            classes = classify_color(image, box_coords)
             #To save image for debugging:
             if DEBUG:
                 print boxes
@@ -109,11 +137,13 @@ class TLClassifier(object):
                 print classes
                 self.save_img_idx += 1
                 img_file_path = '/tmp/img/img%d.png' %(self.save_img_idx)
+                cv2.imwrite(img_file_path, image)
                 height, width = image.shape[0], image.shape[1]
                 box_coords = self.to_image_coords(boxes, height, width)
 
                 # Each class with be represented by a differently colored box
                 self.draw_boxes(image, box_coords, classes, scores)
+                img_file_path = '/tmp/img/box_img%d.png' %(self.save_img_idx)
                 cv2.imwrite(img_file_path, image)
 
             if len(scores) == 0:
