@@ -104,7 +104,7 @@ class WaypointUpdater(object):
             lane.waypoints = final_waypoints
         else:
             #rospy.logwarn('Start decelerating=====================')
-            extended_waypoints = self.base_waypoints.waypoints[farthest_idx,
+            extended_waypoints = self.base_waypoints.waypoints[farthest_idx:
                     self.stopline_wp_idx]
             lane.waypoints = self.decelerate_waypoints(final_waypoints,
                     extended_waypoints, closest_idx) 
@@ -113,13 +113,13 @@ class WaypointUpdater(object):
     def decelerate_waypoints(self, waypoints, extended_waypoints, closest_idx):
         final_waypoints = []
 
-        stop_idx = max(self.stopline_wp_idx-closest_idx-4, 0)
+        stop_idx = max(self.stopline_wp_idx-closest_idx-8, 0)
         extended_dist = self.distance(extended_waypoints, 0, stop_idx-len(waypoints))
         for idx,  wp in enumerate(waypoints):
             p = Waypoint()
             p.pose = wp.pose
 
-            dist = extended_dist + self.distance(waypoints, idx, len(waypoints)-1)
+            dist = extended_dist + self.distance(waypoints, idx, min(len(waypoints)-1, stop_idx))
             vel = math.sqrt(2*self.max_decel*dist)
             if vel < 1.:
                 vel = 0
