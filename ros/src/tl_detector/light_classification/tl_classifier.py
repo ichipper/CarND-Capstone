@@ -5,21 +5,26 @@ import tensorflow as tf
 import cv2
 COLOR_MAP = {1: (0, 255, 0), 2: (255, 0, 0), 3: (255, 255, 0), 4: (0, 0, 255)}
 COLOR_NAME = {1: 'Green', 2: 'Red', 3: 'Yellow', 4: 'Off'}
-COLOR_THRESHOLD = 200
+COLOR_THRESHOLD = 220
 AREA_THRESHOLD = 40
 RED_CHANNEL = 2
 GREEN_CHANNEL = 1
-#SSD_INCEPTION_MODEL_FILE = '../../Traffic-Light-Classification/models/ssd_sim/frozen_inference_graph.pb'
-SSD_INCEPTION_MODEL_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-        #'../../../../models/ssd_sim/frozen_inference_graph.pb')
+#SSD_INCEPTION_MODEL_FILE = '../../Traffic-Light-Classification/models/ssd_udacity/frozen_inference_graph.pb'
+SSD_MOBILENET_MODEL_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
         '../../../../models/ssd_mobilenet_v1_sim_2019_04_06/frozen_inference_graph.pb')
-        #'../../../../models/faster_rcnn_inception_v2_sim_2019_04_05/frozen_inference_graph.pb')
+        #'../../../../models/ssd_sim/frozen_inference_graph.pb')
+FASTER_RCNN_INCEPTION_MODEL_FILE = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+        '../../../../models/faster_rcnn_inception_v2_udacity_2019_04_11/frozen_inference_graph.pb')
 DEBUG = False
 
 class TLClassifier(object):
-    def __init__(self):
+    def __init__(self, is_site):
         #TODO load classifier
-        self.detection_graph = self.load_graph(SSD_INCEPTION_MODEL_FILE)
+        self.is_site = is_site
+        if is_site:
+            self.detection_graph = self.load_graph(FASTER_RCNN_INCEPTION_MODEL_FILE)
+        else:
+            self.detection_graph = self.load_graph(SSD_MOBILENET_MODEL_FILE)
         # `get_tensor_by_name` returns the Tensor with the associated name in the Graph.
         self.image_tensor = self.detection_graph.get_tensor_by_name('image_tensor:0')
 
@@ -129,7 +134,9 @@ class TLClassifier(object):
             boxes, scores, classes = self.filter_boxes(0.5, boxes, scores, classes)
             height, width = image.shape[0], image.shape[1]
             box_coords = self.to_image_coords(boxes, height, width)
-            classes = self.classify_color(image, box_coords)
+            #If it is on simulator, then use color threshold to classify
+            if not self.is_site:
+                classes = self.classify_color(image, box_coords)
             #To save image for debugging:
             if DEBUG:
                 print boxes
