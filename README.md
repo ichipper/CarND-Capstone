@@ -1,6 +1,6 @@
 This is the project repo for the final project of the Udacity Self-Driving Car Nanodegree: Programming a Real Self-Driving Car.
 
-Team members
+### Team members
 * Lalit Phadtare | lalit.phadtare@gmail.com
 * Wen Chen | iceinsouth@gmail.com
 * Shreyas Mundhra | shreyas@mundhra.com
