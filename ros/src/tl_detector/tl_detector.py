@@ -14,7 +14,7 @@ import yaml
 from scipy.spatial import KDTree
 import numpy as np
 
-STATE_COUNT_THRESHOLD = 3
+STATE_COUNT_THRESHOLD = 2
 SAVE_IMAGE_INTERVAL = 2
 SAVE_IMAGE_START = 0
 
@@ -110,7 +110,7 @@ class TLDetector(object):
             self.state = state
         elif self.state_count >= STATE_COUNT_THRESHOLD:
             if self.last_state == TrafficLight.RED and self.state == TrafficLight.GREEN:
-                self.image_counter = -100
+                self.image_counter = -200
             self.last_state = self.state
             light_wp = light_wp if state == TrafficLight.RED else -1
             self.last_wp = light_wp
