@@ -39,6 +39,7 @@ class TLClassifier(object):
         self.detection_classes = self.detection_graph.get_tensor_by_name('detection_classes:0')
 
         self.save_img_idx = 0
+        self.sess = tf.Session(graph=self.detection_graph)
 
     def load_graph(self, graph_file):
         """Loads a frozen inference graph"""
@@ -120,9 +121,10 @@ class TLClassifier(object):
         """
         #TODO implement light color prediction
         image_np = np.expand_dims(np.asarray(image, dtype=np.uint8), 0)
-        with tf.Session(graph=self.detection_graph) as sess:                
+        #with tf.Session(graph=self.detection_graph) as sess:                
+        with self.detection_graph.as_default():
             # Actual detection.
-            (boxes, scores, classes) = sess.run([self.detection_boxes,
+            (boxes, scores, classes) = self.sess.run([self.detection_boxes,
                 self.detection_scores, self.detection_classes], 
                                 feed_dict={self.image_tensor: image_np})
 
