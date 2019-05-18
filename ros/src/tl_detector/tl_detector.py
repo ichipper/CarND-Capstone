@@ -67,7 +67,7 @@ class TLDetector(object):
         self.ros_spin()
 
     def ros_spin(self):
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(2)
         while not rospy.is_shutdown():
             if self.pose is not None and self.waypoints is not None and self.camera_image is not None:
                 self.image_counter += 1
@@ -78,7 +78,8 @@ class TLDetector(object):
                     light_wp, state = self.process_traffic_lights()
                     self.image_counter = 0
                 else:
-                    return
+                    rate.sleep()
+                    continue
 
                 '''
                 Publish upcoming red lights at camera frequency.
@@ -102,6 +103,7 @@ class TLDetector(object):
 
                 #if light_wp >= 0:
                     #rospy.logwarn('Red light!')
+            rate.sleep()
 
     def pose_cb(self, msg):
         self.pose = msg
@@ -199,11 +201,14 @@ class TLDetector(object):
 
         #Get classification
         light_state = self.light_classifier.get_classification(cv_image)
-        rospy.loginfo('Predicted state is %s, and real state is %s',
-                state_dict[light_state], state_dict[light.state]  )
-        if light_state != light.state:
-            rospy.logwarn('Predicted state is %s, and real state is %s',
+        if not self.is_site:
+            rospy.loginfo('Predicted state is %s, and real state is %s',
                     state_dict[light_state], state_dict[light.state]  )
+            if light_state != light.state:
+                rospy.logwarn('Predicted state is %s, and real state is %s',
+                        state_dict[light_state], state_dict[light.state]  )
+        else:
+            rospy.loginfo('Predicted state is %s', state_dict[light_state] )
         return light_state
 
     def process_traffic_lights(self):
