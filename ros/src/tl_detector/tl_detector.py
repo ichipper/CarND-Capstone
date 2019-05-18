@@ -67,19 +67,19 @@ class TLDetector(object):
         self.ros_spin()
 
     def ros_spin(self):
-        rate = rospy.Rate(2)
+        rate = rospy.Rate(3)
         while not rospy.is_shutdown():
             if self.pose is not None and self.waypoints is not None and self.camera_image is not None:
-                self.image_counter += 1
+                #self.image_counter += 1
 
                 ########################
                 
-                if self.image_counter == 4:
-                    light_wp, state = self.process_traffic_lights()
-                    self.image_counter = 0
-                else:
-                    rate.sleep()
-                    continue
+                #if self.image_counter == 2:
+                light_wp, state = self.process_traffic_lights()
+                    #self.image_counter = 0
+                #else:
+                    #rate.sleep()
+                    #continue
 
                 '''
                 Publish upcoming red lights at camera frequency.
